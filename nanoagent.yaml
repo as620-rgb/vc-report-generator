@@ -1,0 +1,10 @@
+id: vc-report-generator
+version: 1.0.0
+runtime: python3.11
+entrypoint: src.plugin.__main__
+permissions:
+  network: false
+tools:
+  - generate_memo
+tasks:
+  - report-generator
