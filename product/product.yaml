@@ -1,0 +1,11 @@
+_ > nanoagent.plugin.v0001.ProductConfig:
+tagline: "A first-pass investment memo on any YC company, with every fact checked"
+summary: "Name a company from a 40-company YC directory snapshot and the year you are writing in. The agent profiles it, finds its competitors, scores its risk with a published formula, and saves a three-section memo: overview, competition and risk with a recommendation. The check confirms every fact, the score, the recommendation and what each section of the saved memo states."
+highlights:
+  - "A transparent risk formula with fixed thresholds: INVEST, FURTHER_DD or PASS"
+  - "Eleven checks on the facts and on the saved memo itself"
+  - "Free prose, checked facts: no model judges the memo"
+steps:
+  - "Ask for a memo, e.g. on Amplitude as of 2026"
+  - "The agent profiles the company, scores it and writes the memo"
+  - "Read the memo, the score and the verdict of every check"

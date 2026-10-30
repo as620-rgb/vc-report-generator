@@ -1,10 +1,43 @@
+_ > nanoagent.plugin.v0001.ManifestConfig:
 id: vc-report-generator
-version: 1.0.0
-runtime: python3.11
-entrypoint: src.plugin.__main__
-permissions:
-  network: false
-tools:
-  - generate_memo
-tasks:
-  - report-generator
+name: VC Memo Generator
+version: 0.1.0
+status: ready
+spec: nanoagent.plugin/v0001
+
+runtime > nanoagent.plugin.v0001.RuntimeConfig:
+  type: mcp_stdio
+  command: [uv, run, --frozen, python, -m, plugin]
+
+permissions > nanoagent.plugin.v0001.PermissionsConfig:
+  network > nanoagent.plugin.v0001.NetworkConfig:
+    hosts: []
+  filesystem > nanoagent.plugin.v0001.FilesystemConfig:
+    write: [workspace]
+
+# One entry per contract.Tool; its input and output classes are contract.TOOLS's.
+tools > dict[contract.Tool, nanoagent.plugin.v0001.ToolConfig]:
+  company_profile:
+    description: Profile one company of the bundled 40-company YC directory, with its batch, location, industry, sub-industry and competitors
+  score_risk:
+    description: Score a company's investment risk from its competitor count, years since its batch and whether it has a sub-industry, with the recommendation the score gives
+  write_memo:
+    description: Save the memo's Overview, Competition and Risk sections to memos/<slug>.md in the workspace
+  pin_memo:
+    description: Pin the answer key, the facts, score and recommendation the memo must report
+
+# One entry per contract.Task; its input class is contract.TASKS's.
+tasks > dict[contract.Task, nanoagent.plugin.v0001.TaskConfig]:
+  write-memo:
+    description: Write a short investment memo on a YC company, with its competitors, a rule-based risk score and a recommendation, and save it
+    runner: agent
+    tools: [company_profile, score_risk, write_memo]
+    reference: pin_memo
+    instructions: |-
+      Plan. Exactly three tool calls, then submit: (1) company_profile with the task's company; (2) score_risk; (3) write_memo; then submit.
+      Score. Call score_risk with competitors the number of names in the profile's competitors, years_since_batch the task's as_of_year minus the profile's batch_year, and has_sub_industry true exactly when the profile's sub_industry is not empty.
+      Memo. Call write_memo with the task's company and three section texts, plain prose without headings:
+      - overview: name the company, its batch exactly as the profile gives it (e.g. Winter 2012) and its location exactly as given (e.g. San Francisco, CA, USA), with its tagline.
+      - competition: name every competitor exactly as the profile spells it, and no other company. With no competitors, write exactly: No direct competitors in the directory.
+      - risk: include the line "Risk score: <score with two decimals>" (e.g. Risk score: 0.46) and the line "Recommendation: <INVEST, FURTHER_DD or PASS>", as score_risk returned them.
+      Submit company, name, competitors (as the profile lists them), years_since_batch, risk_score and recommendation as score_risk returned them, and path as write_memo returned it.
